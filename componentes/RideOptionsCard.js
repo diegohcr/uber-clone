@@ -1,6 +1,8 @@
 /* eslint-disable react/function-component-definition */
 import {useNavigation} from '@react-navigation/native';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
+import 'intl';
+import 'intl/locale-data/jsonp/pt-BR';
 import {
   FlatList,
   SafeAreaView,
@@ -12,6 +14,7 @@ import {
 } from 'react-native';
 import {Icon} from 'react-native-elements';
 import tw from 'tailwind-react-native-classnames';
+import {NavContext} from '../context/navContext';
 
 const data = [
   {
@@ -34,9 +37,12 @@ const data = [
   },
 ];
 
+const SURGE_CAHRGE_RATE = 1.5;
+
 const RideOptionsCars = () => {
   const navigation = useNavigation();
   const [selected, setSelected] = useState(null);
+  const {travelTimeInformation} = useContext(NavContext);
 
   return (
     <SafeAreaView style={tw`bg-white flex-grow`}>
@@ -48,7 +54,9 @@ const RideOptionsCars = () => {
           style={tw`top-3 left-5 p-3 rounded-full h-12 w-12 mr-10`}>
           <Icon name="chevron-left" type="fontawesome" />
         </TouchableOpacity>
-        <Text style={tw`text-center py-5 text-xl`}>Select a Ride</Text>
+        <Text style={tw`text-center py-5 text-xl`}>
+          Select a Ride - {travelTimeInformation?.distance.text}
+        </Text>
       </View>
 
       <FlatList
@@ -67,9 +75,19 @@ const RideOptionsCars = () => {
             />
             <View style={tw`-ml-6`}>
               <Text style={tw`text-lg font-bold`}>{item.title}</Text>
-              <Text>travel time...</Text>
+              <Text>{travelTimeInformation?.duration.text}</Text>
             </View>
-            <Text style={tw`text-lg font-bold`}>R$ 10,00</Text>
+            <Text style={tw`text-lg font-bold`}>
+              {new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              }).format(
+                (travelTimeInformation?.duration.value *
+                  SURGE_CAHRGE_RATE *
+                  item.multiplier) /
+                  100,
+              )}
+            </Text>
           </TouchableOpacity>
         )}
       />

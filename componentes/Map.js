@@ -8,7 +8,8 @@ import {GOOGLE_MAPS_APIKEY} from '@env';
 import {NavContext} from '../context/navContext';
 
 const Map = () => {
-  const {origin, destination} = useContext(NavContext);
+  const {origin, destination, setTravelTimeInformation} =
+    useContext(NavContext);
   const mapRef = useRef(null);
 
   // useEffect(() => {
@@ -20,6 +21,22 @@ const Map = () => {
   //     edgePadding: {top: 50, right: 50, bottom: 50, left: 50},
   //   });
   // }, [origin, destination]);
+
+  useEffect(() => {
+    if (!origin || !destination) return;
+
+    const getTravelTime = () => {
+      fetch(
+        `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin.description}&destinations=${destination.description}&key=${GOOGLE_MAPS_APIKEY}`,
+      )
+        .then(res => res.json())
+        .then(data => {
+          setTravelTimeInformation(data.rows[0].elements[0]);
+        });
+    };
+
+    getTravelTime();
+  }, [origin, destination, GOOGLE_MAPS_APIKEY]);
 
   return (
     <MapView
